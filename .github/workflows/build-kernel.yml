@@ -68,7 +68,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: kernel-${{ github.run_number }}
-        target_commitish: ${{ github.sha }}
+        target_commitish: https://android.googlesource.com/kernel/devices/google/${{ github.event.inputs.codename }}/+/refs/tags/android-16.0.0_r0.0
         name: kernel ${{ github.event.inputs.aosp_branch }} for ${{ github.event.inputs.codename }}
         files: kernel/out/${{ github.event.inputs.codename }}/dist/*.img
         overwrite_files: true
