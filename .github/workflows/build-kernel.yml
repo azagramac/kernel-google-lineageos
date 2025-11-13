@@ -22,7 +22,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
     - name: 📦 Install Build Dependencies
@@ -45,7 +45,7 @@ jobs:
         cd aosp_workspace
 
         if [ ! -d ".repo" ]; then
-          echo "🌱 Initializing AOSP for the first time..."
+          echo "🌱 Initializing AOSP..."
           repo init -u ${{ github.event.inputs.aosp_repo }} -b ${{ github.event.inputs.aosp_branch }} --depth=1 --no-tags
           repo sync -c -j4
         else
@@ -53,8 +53,12 @@ jobs:
           repo sync -c -j4 || echo "⚠️ Repo sync failed, continuing..."
         fi
 
-        # Copiamos el contenido a la raíz del repo
-        rsync -av --exclude='.repo' ./ ../
+        # Mover todo el contenido a la raíz del repositorio
+        shopt -s dotglob
+        mv * ../
+        mv .[!.]* ../ || true
+        cd ..
+        rm -rf aosp_workspace
       shell: bash
 
     - name: 📤 Commit & Push AOSP tree
