@@ -1,4 +1,4 @@
-httpsBuild Kernel Google for LineageOS
+name: 🚀 Build Kernel Google for LineageOS
 
 on:
   workflow_dispatch:
