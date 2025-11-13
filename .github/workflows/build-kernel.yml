@@ -72,26 +72,16 @@ jobs:
       shell: bash
 
     - name: 📤 Commit & Push AOSP tree
-      run: |
-        cd kernel || exit 1
-
-        if [ ! -d ".git" ]; then
-          git init
-          git config user.name "${{ secrets.GIT_NAME }}"
-          git config user.email "${{ secrets.GIT_MAIL }}"
-          git remote add origin https://x-access-token:${{ secrets.GIT_PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
-          git add .
-          git commit -m "${{ github.event.inputs.codename }}"
-        else
-          git config user.name "${{ secrets.GIT_NAME }}"
-          git config user.email "${{ secrets.GIT_MAIL }}"
-          git remote set-url origin https://x-access-token:${{ secrets.GIT_PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
-        fi
-
-        git add -A
-        git commit -m "🌱 Update AOSP tree for ${{ github.event.inputs.codename }} ($(date '+%Y-%m-%d %H:%M'))" || echo "No changes to commit"
-        git push origin HEAD:refs/heads/master
-      shell: bash
+      uses: EndBug/add-and-commit@v9
+      with:
+        author_name: ${{ secrets.GIT_NAME }}
+        author_email: ${{ secrets.GIT_MAIL }}
+        message: "${{ github.event.inputs.codename }} - ($(date '+%Y-%m-%d %H:%M'))"
+        add: "."
+        git_push: true
+        branch: master
+        directory: kernel
+        github_token: ${{ secrets.GIT_PERSONAL_TOKEN }}
 
     - name: ⚙️ Build Kernel
       run: |
