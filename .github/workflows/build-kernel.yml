@@ -12,7 +12,7 @@ on:
         required: true
         default: 'lineage-23.0'
       codename:
-        description: '📱 Codename'
+        description: '📱 Codename device'
         required: true
         default: 'Enter codename'
 
@@ -69,6 +69,24 @@ jobs:
             echo "✅ Last sync was $ELAPSED h ago — skipping sync."
           fi
         fi
+      shell: bash
+
+    - name: 📤 Commit & Push AOSP tree
+      run: |
+        cd kernel
+        git config user.name "${{ secrets.GIT_NAME }}"
+        git config user.email "${{ secrets.GIT_MAIL }}"
+
+        if [ ! -d ".git" ]; then
+          git init
+          git add .
+          git commit -m "Initial commit of AOSP tree"
+        fi
+
+        git remote set-url origin https://x-access-token:${{ secrets.GIT_PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
+        git add -A
+        git commit -m "🌱 Update AOSP tree ($(date '+%Y-%m-%d %H:%M'))" || echo "No changes to commit"
+        git push origin HEAD:${{ github.ref }}
       shell: bash
 
     - name: ⚙️ Build Kernel
