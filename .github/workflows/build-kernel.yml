@@ -73,20 +73,24 @@ jobs:
 
     - name: 📤 Commit & Push AOSP tree
       run: |
-        cd kernel
-        git config user.name "${{ secrets.GIT_NAME }}"
-        git config user.email "${{ secrets.GIT_MAIL }}"
+        cd kernel || exit 1
 
         if [ ! -d ".git" ]; then
           git init
+          git config user.name "${{ secrets.GIT_NAME }}"
+          git config user.email "${{ secrets.GIT_MAIL }}"
+          git remote add origin https://x-access-token:${{ secrets.GIT_PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
           git add .
-          git commit -m "Initial commit of AOSP tree"
+          git commit -m "${{ github.event.inputs.codename }}"
+        else
+          git config user.name "${{ secrets.GIT_NAME }}"
+          git config user.email "${{ secrets.GIT_MAIL }}"
+          git remote set-url origin https://x-access-token:${{ secrets.GIT_PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
         fi
 
-        git remote set-url origin https://x-access-token:${{ secrets.GIT_PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
         git add -A
-        git commit -m "🌱 Update AOSP tree ($(date '+%Y-%m-%d %H:%M'))" || echo "No changes to commit"
-        git push origin HEAD:${{ github.ref }}
+        git commit -m "🌱 Update AOSP tree for ${{ github.event.inputs.codename }} ($(date '+%Y-%m-%d %H:%M'))" || echo "No changes to commit"
+        git push origin HEAD:refs/heads/master
       shell: bash
 
     - name: ⚙️ Build Kernel
