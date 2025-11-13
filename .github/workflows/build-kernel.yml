@@ -39,32 +39,30 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: 🌳 Prepare or update AOSP tree
+    - name: 📥 Checkout repository into kernel
+      uses: actions/checkout@v3
+      with:
+        path: kernel
+        fetch-depth: 0
+
+    - name: 🌳 Prepare or update AOSP tree in kernel
       run: |
-        mkdir -p aosp_workspace
-        cd aosp_workspace
+        cd kernel
 
         if [ ! -d ".repo" ]; then
-          echo "🌱 Initializing AOSP..."
+          echo "🌱 Initializing AOSP for the first time..."
           repo init -u ${{ github.event.inputs.aosp_repo }} -b ${{ github.event.inputs.aosp_branch }} --depth=1 --no-tags
           repo sync -c -j4
         else
           echo "🔄 Updating existing AOSP checkout..."
           repo sync -c -j4 || echo "⚠️ Repo sync failed, continuing..."
         fi
-
-        # Mover todo el contenido a la raíz del repositorio
-        shopt -s dotglob
-        mv * ../
-        mv .[!.]* ../ || true
-        cd ..
-        rm -rf aosp_workspace
       shell: bash
 
     - name: 📤 Commit & Push AOSP tree
       uses: EndBug/add-and-commit@v9
       with:
-        cwd: .
+        cwd: kernel
         add: '.'
         author_name: ${{ secrets.GIT_NAME }}
         author_email: ${{ secrets.GIT_MAIL }}
