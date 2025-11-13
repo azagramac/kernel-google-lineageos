@@ -22,14 +22,13 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
     - name: 📦 Install Build Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          git gnupg flex bison build-essential zip jq curl \
+        sudo apt-get install -y git gnupg flex bison build-essential zip jq curl \
           zlib1g-dev libc6-dev-i386 x11proto-core-dev libx11-dev \
           lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig repo
       shell: bash
@@ -40,54 +39,41 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: 🌳 Prepare or update AOSP tree (only if >12h since last sync)
+    - name: 🌳 Prepare or update AOSP tree
       run: |
-        mkdir -p kernel
-        cd kernel
+        mkdir -p aosp_workspace
+        cd aosp_workspace
 
         if [ ! -d ".repo" ]; then
-          echo "🌱 Initializing for the first time..."
-          repo init -u ${{ github.event.inputs.aosp_repo }} \
-            -b ${{ github.event.inputs.aosp_branch }} --depth=1 --no-tags
+          echo "🌱 Initializing AOSP for the first time..."
+          repo init -u ${{ github.event.inputs.aosp_repo }} -b ${{ github.event.inputs.aosp_branch }} --depth=1 --no-tags
           repo sync -c -j4
-          date +%s > .last_sync
         else
-          echo "🔍 Checking last sync timestamp..."
-          NOW=$(date +%s)
-          if [ -f ".last_sync" ]; then
-            LAST=$(cat .last_sync)
-            ELAPSED=$(( (NOW - LAST) / 3600 ))
-          else
-            ELAPSED=999
-          fi
-
-          if [ $ELAPSED -ge 12 ]; then
-            echo "⏰ More than 12h since last sync ($ELAPSED h) — updating..."
-            repo sync -c -j4 || echo "⚠️ Repo sync failed, continuing with existing sources."
-            date +%s > .last_sync
-          else
-            echo "✅ Last sync was $ELAPSED h ago — skipping sync."
-          fi
+          echo "🔄 Updating existing AOSP checkout..."
+          repo sync -c -j4 || echo "⚠️ Repo sync failed, continuing..."
         fi
+
+        # Copiamos el contenido a la raíz del repo
+        rsync -av --exclude='.repo' ./ ../
       shell: bash
 
     - name: 📤 Commit & Push AOSP tree
       uses: EndBug/add-and-commit@v9
       with:
+        cwd: .
+        add: '.'
         author_name: ${{ secrets.GIT_NAME }}
         author_email: ${{ secrets.GIT_MAIL }}
-        message: "${{ github.event.inputs.codename }} - ($(date '+%Y-%m-%d %H:%M'))"
-        add: "."
-        git_push: true
-        branch: master
-        directory: kernel
-        github_token: ${{ secrets.GIT_PERSONAL_TOKEN }}
+        message: "${{ github.event.inputs.codename }} - ($(date '+%d-%m-%Y %H:%M'))"
+        pull: '--rebase --autostash origin master'
+        push: true
+        default_author: user_info
+      env:
+        GIT_ASKPASS: /bin/echo
+        GIT_PASSWORD: ${{ secrets.GIT_PERSONAL_TOKEN }}
 
     - name: ⚙️ Build Kernel
       run: |
-        cd kernel
-        export JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
-        export PATH=$JAVA_HOME/bin:$PATH
         bash private/devices/google/${{ github.event.inputs.codename }}/build_${{ github.event.inputs.codename }}.sh
       shell: bash
 
