@@ -59,21 +59,6 @@ jobs:
         fi
       shell: bash
 
-    - name: 📤 Commit & Push AOSP tree
-      uses: EndBug/add-and-commit@v9
-      with:
-        cwd: kernel
-        add: '.'
-        author_name: ${{ secrets.GIT_NAME }}
-        author_email: ${{ secrets.GIT_MAIL }}
-        message: "${{ github.event.inputs.codename }} - ($(date '+%d-%m-%Y %H:%M'))"
-        pull: '--rebase --autostash origin master'
-        push: true
-        default_author: user_info
-      env:
-        GIT_ASKPASS: /bin/echo
-        GIT_PASSWORD: ${{ secrets.GIT_PERSONAL_TOKEN }}
-
     - name: ⚙️ Build Kernel
       run: |
         bash private/devices/google/${{ github.event.inputs.codename }}/build_${{ github.event.inputs.codename }}.sh
@@ -84,7 +69,7 @@ jobs:
       with:
         tag_name: kernel-${{ github.run_number }}
         target_commitish: ${{ github.sha }}
-        name: ${{ github.event.inputs.codename }} kernel ${{ github.event.inputs.aosp_branch }}
+        name: kernel ${{ github.event.inputs.aosp_branch }} for ${{ github.event.inputs.codename }}
         files: kernel/out/${{ github.event.inputs.codename }}/dist/*.img
         overwrite_files: true
         generate_release_notes: true
