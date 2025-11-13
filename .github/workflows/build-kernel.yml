@@ -48,7 +48,6 @@ jobs:
     - name: 🌳 Prepare or update AOSP tree in kernel
       run: |
         cd kernel
-
         if [ ! -d ".repo" ]; then
           echo "🌱 Initializing AOSP for the first time..."
           repo init -u ${{ github.event.inputs.aosp_repo }} -b ${{ github.event.inputs.aosp_branch }} --depth=1 --no-tags
@@ -61,8 +60,8 @@ jobs:
 
     - name: ⚙️ Build Kernel
       run: |
-        ls -lR private/devices/google
-        #bash private/devices/google/${{ github.event.inputs.codename }}/build_${{ github.event.inputs.codename }}.sh
+        cd kernel
+        bash private/devices/google/${{ github.event.inputs.codename }}/build_${{ github.event.inputs.codename }}.sh
       shell: bash
 
     - name: 📦 Upload ${{ github.event.inputs.codename }} Kernel
