@@ -61,7 +61,8 @@ jobs:
 
     - name: ⚙️ Build Kernel
       run: |
-        bash private/devices/google/${{ github.event.inputs.codename }}/build_${{ github.event.inputs.codename }}.sh
+        ls -lR private/devices/google
+        #bash private/devices/google/${{ github.event.inputs.codename }}/build_${{ github.event.inputs.codename }}.sh
       shell: bash
 
     - name: 📦 Upload ${{ github.event.inputs.codename }} Kernel
