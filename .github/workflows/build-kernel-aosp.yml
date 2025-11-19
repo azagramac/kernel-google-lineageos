@@ -200,7 +200,7 @@ jobs:
               fi
 
               echo "ℹ️ Info for $img:"
-                  "$AVBTOOL" info_image --image "$DIST/$img\n"
+                  "$AVBTOOL" info_image --image "$DIST/$img"
           fi
         shell: bash
 
