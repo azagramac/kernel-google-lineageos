@@ -79,6 +79,7 @@ Vendor module
 A hardware-specific module developed by a partner and that contains SoC and device-specific functionality. A vendor module is a type of dynamically loadable kernel module
 
 ---
+
 ### 🌰 Build custom kernel
 
 Enter the [GitHub Actions workflow](https://github.com/azagramac/build-kernel-aosp-pixel/actions/workflows/build-kernel.yml)
