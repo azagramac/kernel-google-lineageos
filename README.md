@@ -83,9 +83,7 @@ A hardware-specific module developed by a partner and that contains SoC and devi
 
 Enter the [GitHub Actions workflow](https://github.com/azagramac/build-kernel-aosp-pixel/actions/workflows/build-kernel.yml)
 
-<div align="center">
-  <img width="550" height="874" alt="image" src="https://github.com/user-attachments/assets/329e729c-793d-4411-8c4a-0e9e89ea5b73" />
-</div>
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/e7f3144a-9984-49cb-88a9-84a262d1d599" />
 
 Select codename device, build mode, and LTO mode.
 
